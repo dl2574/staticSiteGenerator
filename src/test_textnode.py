@@ -9,23 +9,23 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(node, node2)
 
     def test_text_not_eq(self):
-        node = TextNode("Some text", TextType.NORMAL)
-        node2 = TextNode("Some other text", TextType.NORMAL)
+        node = TextNode("Some text", TextType.TEXT)
+        node2 = TextNode("Some other text", TextType.TEXT)
         self.assertNotEqual(node, node2)
 
     def test_type_not_eq(self):
-        node = TextNode("Some text", TextType.NORMAL)
+        node = TextNode("Some text", TextType.TEXT)
         node2 = TextNode("Some text", TextType.BOLD)
         self.assertNotEqual(node, node2)
 
     def test_url_not_eq(self):
-        node = TextNode("Some text", TextType.NORMAL)
-        node2 = TextNode("Some text", TextType.NORMAL, "https://someurl.com")
+        node = TextNode("Some text", TextType.TEXT)
+        node2 = TextNode("Some text", TextType.TEXT, "https://someurl.com")
         self.assertNotEqual(node, node2)
 
     def test_url_eq(self):
-        node = TextNode("Some text", TextType.NORMAL, "https://someurl.com")
-        node2 = TextNode("Some text", TextType.NORMAL, "https://someurl.com")
+        node = TextNode("Some text", TextType.TEXT, "https://someurl.com")
+        node2 = TextNode("Some text", TextType.TEXT, "https://someurl.com")
         self.assertEqual(node, node2)
 
     
