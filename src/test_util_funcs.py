@@ -48,3 +48,28 @@ class TestSplitNodeDelimiterFunc(unittest.TestCase):
         self.assertIsInstance(new_nodes,list)
         self.assertEqual(new_nodes, expected_result)
         
+class TestExtractImage(unittest.TestCase):
+    def test_extract_markdown_images(self):
+        matches = utils.extract_markdown_images(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+
+    def test_does_not_match_link(self):
+        matches = utils.extract_markdown_images(
+            "This is text with an [Link](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertEqual(matches, [])
+
+class TestExtractLink(unittest.TestCase):
+    def test_extract_markdown_link(self):
+        matches = utils.extract_markdown_links(
+            "This is text with an [Link](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("Link", "https://i.imgur.com/zjjcJKZ.png")], matches)
+
+    def test_does_not_match_image(self):
+        matches = utils.extract_markdown_links(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertEqual(matches, [])
