@@ -101,3 +101,10 @@ def text_to_textnodes(text):
     bold_italic_code_image_list = split_nodes_image(bold_italic_code_list)
     final_list = split_nodes_link(bold_italic_code_image_list)
     return final_list
+
+def markdown_to_blocks(markdown):
+    block_split = markdown.split("\n\n")
+    strip_blocks = list(map(lambda s: s.strip(), block_split))
+    remove_empty_blocks = [x for x in strip_blocks if x != ""]
+    return remove_empty_blocks
+
