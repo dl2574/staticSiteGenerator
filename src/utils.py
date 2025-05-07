@@ -37,3 +37,52 @@ def extract_markdown_images(text):
 def extract_markdown_links(text):
     matches = re.findall(r" \[(.*?)\]\((.*?)\)", text)
     return matches
+
+def split_nodes_image(old_nodes):
+    new_node_list = []
+    for node in old_nodes:
+        extracted_images = extract_markdown_images(node.text)
+        split_node = re.split(r"\!\[.*?\]\(.*?\)", node.text)
+        for text in split_node:
+            if text == "":
+                try:
+                    image = extracted_images.pop(0)
+                    new_node_list.append(TextNode(image[0], TextType.IMAGE, image[1]))
+                except IndexError:
+                    pass
+
+            else:
+                new_node_list.append(TextNode(text, TextType.TEXT))
+                try:
+                    image = extracted_images.pop(0)
+                    new_node_list.append(TextNode(image[0], TextType.IMAGE, image[1]))
+                except IndexError:
+                    pass
+    return new_node_list
+
+
+
+def split_nodes_link(old_nodes):
+    new_node_list = []
+    for node in old_nodes:
+        extracted_links = extract_markdown_links(node.text)
+        split_node = re.split(r"\[.*?\]\(.*?\)", node.text)
+        for text in split_node:
+            if text == "":
+                try:
+                    link = extracted_links.pop(0)
+                    new_node_list.append(TextNode(link[0], TextType.LINK, link[1]))
+                except IndexError:
+                    pass
+
+            else:
+                new_node_list.append(TextNode(text, TextType.TEXT))
+                try:
+                    link = extracted_links.pop(0)
+                    new_node_list.append(TextNode(link[0], TextType.LINK, link[1]))
+                except IndexError:
+                    pass
+    return new_node_list
+
+def text_to_textnodes(text):
+    pass
