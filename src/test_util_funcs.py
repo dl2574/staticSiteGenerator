@@ -2,6 +2,7 @@ import unittest
 import utils
 
 from textnode import TextNode, TextType
+from blocknode import BlockType
 
 
 class TestTextToHTMLFunc(unittest.TestCase):
@@ -152,3 +153,66 @@ This is the same paragraph on a new line
                     "- This is a list\n- with items",
                 ],
             )
+
+class TestBlockToBlockType(unittest.TestCase):
+    def test_heading_type(self):
+        heading_1 = "# Heading"
+        heading_2 = "## Heading"
+        heading_3 = "### Heading"
+        heading_4 = "#### Heading"
+        heading_5 = "##### Heading"
+        heading_6 = "###### Heading"
+        not_heading = "* Heading"
+
+        self.assertEqual(utils.block_to_block_type(heading_1), BlockType.HEADING)
+        self.assertEqual(utils.block_to_block_type(heading_2), BlockType.HEADING)
+        self.assertEqual(utils.block_to_block_type(heading_3), BlockType.HEADING)
+        self.assertEqual(utils.block_to_block_type(heading_4), BlockType.HEADING)
+        self.assertEqual(utils.block_to_block_type(heading_5), BlockType.HEADING)
+        self.assertEqual(utils.block_to_block_type(heading_6), BlockType.HEADING)
+        self.assertNotEqual(utils.block_to_block_type(not_heading), BlockType.HEADING)
+
+    def test_code_block(self):
+        code_text = "```Some code...```"
+        code_text_with_linebreak = "```Line 1\nLine2```"
+        not_code = "``something``"
+        not_code2 = "```something without the right end``"
+        not_code3 = "``Something without the right start```"
+
+        self.assertEqual(utils.block_to_block_type(code_text), BlockType.CODE)
+        self.assertEqual(utils.block_to_block_type(code_text_with_linebreak), BlockType.CODE)
+        self.assertNotEqual(utils.block_to_block_type(not_code), BlockType.CODE)
+        self.assertNotEqual(utils.block_to_block_type(not_code2), BlockType.CODE)
+        self.assertNotEqual(utils.block_to_block_type(not_code3), BlockType.CODE)
+
+    def test_quote(self):
+        quote_text = "> The first line\n> Next line\n> and last line"
+        not_quote = "> First line\nbut not second\n> Third is though"
+        not_quote2 = "> First line is\nSecondline isn't"
+
+        self.assertEqual(utils.block_to_block_type(quote_text), BlockType.QUOTE)
+        self.assertNotEqual(utils.block_to_block_type(not_quote), BlockType.QUOTE)
+        self.assertNotEqual(utils.block_to_block_type(not_quote2), BlockType.QUOTE)
+
+    def test_unordered_list(self):
+        list_text = "- Item one\n- Item two\n- Item three"
+        not_list = "- Item 1\nand item 2"
+        not_list2 = "- Item 1\nnot 2\n - yes 3"
+
+        self.assertEqual(utils.block_to_block_type(list_text), BlockType.UO_LIST)
+        self.assertNotEqual(utils.block_to_block_type(not_list), BlockType.UO_LIST)
+        self.assertNotEqual(utils.block_to_block_type(not_list2), BlockType.UO_LIST)
+
+    def test_ordered_list(self):
+        list_text = "1. Test list\n2. List item 2\n3. and list item 3"
+        not_list = "e. List item 1\n5. item 3\nt. item 3"
+        not_list2 = "1. List item 1\n1. List item 2"
+
+        self.assertEqual(utils.block_to_block_type(list_text), BlockType.O_LIST)
+        self.assertNotEqual(utils.block_to_block_type(not_list), BlockType.O_LIST)
+        self.assertNotEqual(utils.block_to_block_type(not_list2), BlockType.O_LIST)
+
+    def test_paragraph(self):
+        p_text = "This is a paragraph"
+
+        self.assertEqual(utils.block_to_block_type(p_text), BlockType.PARAGRAPH)

@@ -1,7 +1,9 @@
 import re
+import functools
 
 from textnode import TextNode, TextType
 from htmlnode import LeafNode
+from blocknode import BlockType
 
 def text_node_to_html_node(text_node):
     match text_node.text_type:
@@ -107,4 +109,23 @@ def markdown_to_blocks(markdown):
     strip_blocks = list(map(lambda s: s.strip(), block_split))
     remove_empty_blocks = [x for x in strip_blocks if x != ""]
     return remove_empty_blocks
+
+def block_to_block_type(markdown_block):
+    def compile_quote(accumulator, nextLine):
+        if type(accumulator) != bool:
+            accumulator = accumulator.startswith("> ")
+        return accumulator and nextLine.startswith("> ")
+
+    if re.match(r"^#{1,6}\s.*", markdown_block):
+        return BlockType.HEADING
+    elif markdown_block[:3] == "```" and markdown_block[-3:] == "```":
+        return BlockType.CODE
+    elif functools.reduce(compile_quote, markdown_block.split("\n")):
+        return BlockType.QUOTE
+    elif re.fullmatch(r"^-\s.*\n*?", markdown_block):
+        return BlockType.UO_LIST
+    elif re.fullmatch(r"^\d\.\s.*\n*?", markdown_block):
+        return BlockType.O_LIST
+    else:
+        return BlockType.PARAGRAPH
 
