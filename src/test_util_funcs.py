@@ -203,14 +203,14 @@ class TestBlockToBlockType(unittest.TestCase):
         self.assertNotEqual(utils.block_to_block_type(not_list), BlockType.UO_LIST)
         self.assertNotEqual(utils.block_to_block_type(not_list2), BlockType.UO_LIST)
 
-    # def test_ordered_list(self):
-    #     list_text = "1. Test list\n2. List item 2\n3. and list item 3"
-    #     not_list = "e. List item 1\n5. item 3\nt. item 3"
-    #     not_list2 = "1. List item 1\n1. List item 2"
+    def test_ordered_list(self):
+        list_text = "1. Test list\n2. List item 2\n3. and list item 3"
+        not_list = "e. List item 1\n5. item 3\nt. item 3"
+        not_list2 = "1. List item 1\n1. List item 2"
 
-    #     self.assertEqual(utils.block_to_block_type(list_text), BlockType.O_LIST)
-    #     self.assertNotEqual(utils.block_to_block_type(not_list), BlockType.O_LIST)
-    #     self.assertNotEqual(utils.block_to_block_type(not_list2), BlockType.O_LIST)
+        self.assertEqual(utils.block_to_block_type(list_text), BlockType.O_LIST)
+        self.assertNotEqual(utils.block_to_block_type(not_list), BlockType.O_LIST)
+        self.assertNotEqual(utils.block_to_block_type(not_list2), BlockType.O_LIST)
 
     def test_paragraph(self):
         p_text = "This is a paragraph"

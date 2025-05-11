@@ -110,40 +110,28 @@ def markdown_to_blocks(markdown):
     remove_empty_blocks = [x for x in strip_blocks if x != ""]
     return remove_empty_blocks
 
-def block_to_block_type(markdown_block):
-    def compile_quote(accumulator, nextLine):
-        if type(accumulator) != bool:
-            accumulator = accumulator.startswith("> ")
-        return accumulator and nextLine.startswith("> ")
-    
-    def compile_unordered_list(accumulator, nextLine):
-        if type(accumulator) != bool:
-            accumulator = accumulator.startswith("- ")
-        return accumulator and nextLine.startswith("- ")
+def block_to_block_type(block):
+    lines = block.split("\n")
 
-# WORK IN PROGRESS    
-    def compile_ordered_list(accumulator, nextLine):
-        try:
-            int(accumulator[0])
-        except ValueError:
-            return "Fail"
-        
-        if accumulator.startswith(f"{accumulator[0]}. ") and nextLine.startswith(f"{accumulator[0]+1}. "):
-            return nextLine
-        else:
-            return "Fail"
-# WORK IN PROGRESS
-
-    if re.match(r"^#{1,6}\s.*", markdown_block):
+    if block.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
         return BlockType.HEADING
-    elif markdown_block[:3] == "```" and markdown_block[-3:] == "```":
+    if block[0:3] == "```" and block[-3:] == "```":
         return BlockType.CODE
-    elif functools.reduce(compile_quote, markdown_block.split("\n")) == True:
+    if block.startswith(">"):
+        for line in lines:
+            if not line.startswith(">"):
+                return BlockType.PARAGRAPH
         return BlockType.QUOTE
-    elif functools.reduce(compile_unordered_list, markdown_block.split("\n")) == True:
+    if block.startswith("- "):
+        for line in lines:
+            if not line.startswith("- "):
+                return BlockType.PARAGRAPH
         return BlockType.UO_LIST
-    elif functools.reduce(compile_ordered_list, markdown_block.split("\n")) == True:
+    if block.startswith("1. "):
+        i = 1
+        for line in lines:
+            if not line.startswith(f"{i}. "):
+                return BlockType.PARAGRAPH
+            i += 1
         return BlockType.O_LIST
-    else:
-        return BlockType.PARAGRAPH
-
+    return BlockType.PARAGRAPH
