@@ -135,3 +135,54 @@ def block_to_block_type(block):
             i += 1
         return BlockType.O_LIST
     return BlockType.PARAGRAPH
+
+
+def find_heading_level(text):
+    heading_level = 0
+
+    while heading_level < 6:
+        if text[heading_level] == "#":
+            heading_level += 1
+        else:
+            break
+    return heading_level
+
+def block_to_html_node(block_text, block_type):
+    match block_type:
+        case BlockType.PARAGRAPH:
+            return LeafNode("p", block_text)
+        case BlockType.HEADING:
+            heading_level = find_heading_level(block_text)
+            heading_tag = f"h{heading_level}"
+            return LeafNode(heading_tag, )
+        case BlockType.CODE:
+            pass
+        case BlockType.QUOTE:
+            pass
+        case BlockType.UO_LIST:
+            pass
+        case BlockType.O_LIST:
+            pass
+
+
+def text_to_children(text):
+    pass
+
+
+def markdown_to_html_node(markdown):
+    text_blocks = markdown_to_blocks(markdown)
+    html_node_tree = []
+
+    
+    for block in text_blocks:
+        # Determine the type of block
+        block_type = block_to_block_type(block)
+
+        # Look for inline nodes within the block text (bold, italic, code, link, or image)
+        child_nodes = text_to_textnodes(block)
+
+        # Convert Child Nodes to HTML Nodes
+        if child_nodes:
+            html_node_children = list(map(text_node_to_html_node, child_nodes))
+
+        
