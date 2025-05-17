@@ -2,7 +2,7 @@ import re
 import functools
 
 from textnode import TextNode, TextType
-from htmlnode import LeafNode
+from htmlnode import LeafNode, ParentNode
 from blocknode import BlockType
 
 def text_node_to_html_node(text_node):
@@ -147,26 +147,45 @@ def find_heading_level(text):
             break
     return heading_level
 
-def block_to_html_node(block_text, block_type):
+def text_to_children(block_text, block_type):
+    process_text = []
+
     match block_type:
         case BlockType.PARAGRAPH:
-            return LeafNode("p", block_text)
+            process_text = [block_text]
+
         case BlockType.HEADING:
             heading_level = find_heading_level(block_text)
-            heading_tag = f"h{heading_level}"
-            return LeafNode(heading_tag, )
+            process_text = [block_text[(heading_level+1):]]
+
         case BlockType.CODE:
-            pass
+            process_text = [block_text.strip("```")]
+
         case BlockType.QUOTE:
-            pass
+            split_block_text = block_text.split("\n")
+
+            # Remove "> " from the start of each line
+            process_text = [item[2:] for item in split_block_text if item != ""]
+
         case BlockType.UO_LIST:
-            pass
+            split_block_text = block_text.split("\n")
+
+            # Remove "- " from the start of each line
+            process_text = [item[2:] for item in split_block_text if item != ""]
+
         case BlockType.O_LIST:
-            pass
+            split_block_text = block_text.split("\n")
 
+            # Remove "#. " from the start of each line
+            process_text = [item[3:] for item in split_block_text if item != ""]
 
-def text_to_children(text):
-    pass
+    if len(process_text) > 1:
+        pass
+    else:
+        child_nodes = text_to_textnodes(process_text[0])
+        child_html_nodes = list(map(text_node_to_html_node, child_nodes))
+        return child_html_nodes
+
 
 
 def markdown_to_html_node(markdown):
