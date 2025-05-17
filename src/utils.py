@@ -180,11 +180,16 @@ def text_to_children(block_text, block_type):
             process_text = [item[3:] for item in split_block_text if item != ""]
 
     if len(process_text) > 1:
-        pass
+        child_list = []
+        for text in process_text:
+            child_nodes = text_to_textnodes(text)
+            html_nodes = list(map(text_node_to_html_node, child_nodes))
+            child_list.append(html_nodes)
+        return child_list
     else:
         child_nodes = text_to_textnodes(process_text[0])
         child_html_nodes = list(map(text_node_to_html_node, child_nodes))
-        return child_html_nodes
+        return [child_html_nodes]
 
 
 
@@ -198,10 +203,8 @@ def markdown_to_html_node(markdown):
         block_type = block_to_block_type(block)
 
         # Look for inline nodes within the block text (bold, italic, code, link, or image)
-        child_nodes = text_to_textnodes(block)
+        child_nodes = text_to_children(block, block_type)
 
-        # Convert Child Nodes to HTML Nodes
-        if child_nodes:
-            html_node_children = list(map(text_node_to_html_node, child_nodes))
+        
 
         
