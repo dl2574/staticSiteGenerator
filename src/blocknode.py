@@ -4,7 +4,7 @@ class BlockType(Enum):
     PARAGRAPH = "p"
     HEADING = "hdg"
     CODE = "code"
-    QUOTE = "quote"
-    UO_LIST = "uol"
+    QUOTE = "quoteblock"
+    UO_LIST = "ul"
     O_LIST = "ol"
 

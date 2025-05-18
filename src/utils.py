@@ -195,16 +195,41 @@ def text_to_children(block_text, block_type):
 
 def markdown_to_html_node(markdown):
     text_blocks = markdown_to_blocks(markdown)
-    html_node_tree = []
+    header_node = ParentNode("header", [])
+    body_node_children = [header_node]
 
     
     for block in text_blocks:
         # Determine the type of block
         block_type = block_to_block_type(block)
 
-        # Look for inline nodes within the block text (bold, italic, code, link, or image)
+        # Get a list of lists of child nodes
         child_nodes = text_to_children(block, block_type)
 
-        
+        if (block_type == BlockType.O_LIST) or (block_type == BlockType.UO_LIST):
+            list_items = []
+            for child_list in child_nodes:
+                new_li = ParentNode("li", child_list)
+                list_items.append(new_li)
+            list_parent = ParentNode(block_type, list_items)
+            div_wrap = ParentNode("div", list_parent)
+            body_node_children.append(div_wrap)
+        elif block_type == BlockType.HEADING:
+            hdg_level = find_heading_level(block)
+            hdg_parent = ParentNode(f"h{hdg_level}", child_nodes[0])
+            div_wrap = ParentNode("div", hdg_parent)
+            body_node_children.append(div_wrap)
+        elif block_type == BlockType.CODE:
+            code_node = ParentNode("code", child_nodes[0])
+            pre_wrap = ParentNode("pre", code_node)
+            div_wrap = ParentNode("div", pre_wrap)
+            body_node_children.append(div_wrap)
+        else:
+            new_node = ParentNode(block_type, child_nodes[0])
+            div_wrap = ParentNode("div", new_node)
+            body_node_children.append(div_wrap)
 
-        
+
+    body_node = ParentNode("body", body_node_children)
+    html_node = ParentNode("html", [body_node])
+    return html_node
