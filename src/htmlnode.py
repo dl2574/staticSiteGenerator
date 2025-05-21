@@ -48,6 +48,10 @@ class ParentNode(HTMLNode):
         html = f"<{self.tag}>"
 
         for child in self.children:
+            # print("\n***********************")
+            # print(f"Converting child: {child}")
+            # print("to HTML")
+            # print("***********************\n")
             html += child.to_html()
 
         html += f"</{self.tag}>"

@@ -212,21 +212,21 @@ def markdown_to_html_node(markdown):
                 new_li = ParentNode("li", child_list)
                 list_items.append(new_li)
             list_parent = ParentNode(block_type, list_items)
-            div_wrap = ParentNode("div", list_parent)
+            div_wrap = ParentNode("div", [list_parent])
             body_node_children.append(div_wrap)
         elif block_type == BlockType.HEADING:
             hdg_level = find_heading_level(block)
             hdg_parent = ParentNode(f"h{hdg_level}", child_nodes[0])
-            div_wrap = ParentNode("div", hdg_parent)
+            div_wrap = ParentNode("div", [hdg_parent])
             body_node_children.append(div_wrap)
         elif block_type == BlockType.CODE:
             code_node = ParentNode("code", child_nodes[0])
-            pre_wrap = ParentNode("pre", code_node)
-            div_wrap = ParentNode("div", pre_wrap)
+            pre_wrap = ParentNode("pre", [code_node])
+            div_wrap = ParentNode("div", [pre_wrap])
             body_node_children.append(div_wrap)
         else:
             new_node = ParentNode(block_type, child_nodes[0])
-            div_wrap = ParentNode("div", new_node)
+            div_wrap = ParentNode("div", [new_node])
             body_node_children.append(div_wrap)
 
 
