@@ -1,5 +1,4 @@
-import re
-import functools
+import re, os, shutil, functools
 
 from textnode import TextNode, TextType
 from htmlnode import LeafNode, ParentNode
@@ -194,42 +193,108 @@ def text_to_children(block_text, block_type):
 
 
 def markdown_to_html_node(markdown):
-    text_blocks = markdown_to_blocks(markdown)
-    header_node = ParentNode("header", [])
-    body_node_children = [header_node]
+    blocks = markdown_to_blocks(markdown)
+    children = []
+    for block in blocks:
+        html_node = block_to_html_node(block)
+        children.append(html_node)
+    return ParentNode("div", children, None)
 
-    
-    for block in text_blocks:
-        # Determine the type of block
-        block_type = block_to_block_type(block)
 
-        # Get a list of lists of child nodes
-        child_nodes = text_to_children(block, block_type)
+def block_to_html_node(block):
+    block_type = block_to_block_type(block)
+    if block_type == BlockType.PARAGRAPH:
+        return paragraph_to_html_node(block)
+    if block_type == BlockType.HEADING:
+        return heading_to_html_node(block)
+    if block_type == BlockType.CODE:
+        return code_to_html_node(block)
+    if block_type == BlockType.OLIST:
+        return olist_to_html_node(block)
+    if block_type == BlockType.ULIST:
+        return ulist_to_html_node(block)
+    if block_type == BlockType.QUOTE:
+        return quote_to_html_node(block)
+    raise ValueError("invalid block type")
 
-        if (block_type == BlockType.O_LIST) or (block_type == BlockType.UO_LIST):
-            list_items = []
-            for child_list in child_nodes:
-                new_li = ParentNode("li", child_list)
-                list_items.append(new_li)
-            list_parent = ParentNode(block_type, list_items)
-            div_wrap = ParentNode("div", [list_parent])
-            body_node_children.append(div_wrap)
-        elif block_type == BlockType.HEADING:
-            hdg_level = find_heading_level(block)
-            hdg_parent = ParentNode(f"h{hdg_level}", child_nodes[0])
-            div_wrap = ParentNode("div", [hdg_parent])
-            body_node_children.append(div_wrap)
-        elif block_type == BlockType.CODE:
-            code_node = ParentNode("code", child_nodes[0])
-            pre_wrap = ParentNode("pre", [code_node])
-            div_wrap = ParentNode("div", [pre_wrap])
-            body_node_children.append(div_wrap)
+
+def text_to_children(text):
+    text_nodes = text_to_textnodes(text)
+    children = []
+    for text_node in text_nodes:
+        html_node = text_node_to_html_node(text_node)
+        children.append(html_node)
+    return children
+
+
+def paragraph_to_html_node(block):
+    lines = block.split("\n")
+    paragraph = " ".join(lines)
+    children = text_to_children(paragraph)
+    return ParentNode("p", children)
+
+
+def heading_to_html_node(block):
+    level = 0
+    for char in block:
+        if char == "#":
+            level += 1
         else:
-            new_node = ParentNode(block_type, child_nodes[0])
-            div_wrap = ParentNode("div", [new_node])
-            body_node_children.append(div_wrap)
+            break
+    if level + 1 >= len(block):
+        raise ValueError(f"invalid heading level: {level}")
+    text = block[level + 1 :]
+    children = text_to_children(text)
+    return ParentNode(f"h{level}", children)
 
 
-    body_node = ParentNode("body", body_node_children)
-    html_node = ParentNode("html", [body_node])
-    return html_node
+def code_to_html_node(block):
+    if not block.startswith("```") or not block.endswith("```"):
+        raise ValueError("invalid code block")
+    text = block[4:-3]
+    raw_text_node = TextNode(text, TextType.TEXT)
+    child = text_node_to_html_node(raw_text_node)
+    code = ParentNode("code", [child])
+    return ParentNode("pre", [code])
+
+
+def olist_to_html_node(block):
+    items = block.split("\n")
+    html_items = []
+    for item in items:
+        text = item[3:]
+        children = text_to_children(text)
+        html_items.append(ParentNode("li", children))
+    return ParentNode("ol", html_items)
+
+
+def ulist_to_html_node(block):
+    items = block.split("\n")
+    html_items = []
+    for item in items:
+        text = item[2:]
+        children = text_to_children(text)
+        html_items.append(ParentNode("li", children))
+    return ParentNode("ul", html_items)
+
+
+def quote_to_html_node(block):
+    lines = block.split("\n")
+    new_lines = []
+    for line in lines:
+        if not line.startswith(">"):
+            raise ValueError("invalid quote block")
+        new_lines.append(line.lstrip(">").strip())
+    content = " ".join(new_lines)
+    children = text_to_children(content)
+    return ParentNode("blockquote", children)
+
+def copy_static_to_public():
+    if os.path.exists("public/"):
+        print("-> Removing public/...")
+        shutil.rmtree("public/")
+
+    print("-> Creating new public/ structure from static")
+    print("--> Create public/")
+    os.mkdir("public")
+
